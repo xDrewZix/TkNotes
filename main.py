@@ -22,18 +22,36 @@ class Notebook():
 		
 		
 	
+class Library():
 
+	def __init__(self):
 
+		self.__library = []
+
+	def addToLibrary(self, notebook):
+
+		self.__library.append(notebook)
 	
-library = []
-nextLibraryId = 0
+	def getLibraryID(self):
+
+		return len(self.__library)
+	
+	def retrieveNoteBook(self, id):
+
+		return self.__library[id]
+
+
+
+
+
+
 def noteBookDetails():
 
 	instruction = Label(root, text="please to enter a notebook name")
 	instruction.grid(row=2, column=3)
 	e = Entry(root)
 	e.grid(row=3, column=3)
-	addButton = Button(root, text="press to add", command=lambda: createNoteBook(e.get()))
+	addButton = Button(root, text="press to add", command=lambda: self.createNoteBook(e.get()))
 	addButton.grid(row=5, column=5)
 	
 	
@@ -42,10 +60,10 @@ def createNoteBook(name):
 		createlibraryframe.grid_forget()
 	else:	
 		oNotebook = Notebook(name)
-		library.append(oNotebook)
+		library.addToLibrary(oNotebook)
 		e.delete(0, 'end')
 		createlibraryframe.grid_forget()
-		id=len(library)
+		id=library.getLibraryID()
 		value = oNotebook.notes
 		value =len(value)
 		my_List.insert(parent='', index='end', iid=id, text=f"{oNotebook.name}", values=(value))
@@ -72,12 +90,14 @@ def getnotes(name):
 def getselection(entry):
 	selection = my_List.selection()[0]
 	parent_id = my_List.parent(selection)
+
 	if parent_id == '':
-		notebook = library[int(selection) - 1]
+		id = int(selection) - 1
+		notebook = library.retrieveNoteBook(id)
 		addnotes(notebook, entry, selection)
 	else:
-		parent_id = int(parent_id)
-		notebook = library[parent_id - 1]
+		parent_id = int(parent_id) - 1
+		notebook = library.retrieveNoteBook(parent_id)
 		addnotes(notebook, entry, selection)
 		
 	
@@ -88,7 +108,8 @@ def insertText():
 		pass
 	else:
 		parent_id = int(parent_id)
-		notebook = library[parent_id - 1]
+		id = parent_id - 1
+		notebook = library.retrieveNoteBook(id)
 		text = notebook.notes[selecteditem]
 		notewindow.delete('1.0', 'end')
 		notewindow.insert('end', text)
@@ -114,7 +135,7 @@ root = Tk()
 
 #add tree to sidebar.
 
-
+library = Library()
 
 my_List = ttk.Treeview(root)
 my_List['column'] = ("entries")
