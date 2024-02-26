@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import ttk
+from tkinter import messagebox
 
 
 
@@ -57,12 +58,11 @@ def noteBookDetails():
 	
 def createNoteBook(name):
 	if name == '':
-		createlibraryframe.grid_forget()
+		return
 	else:	
 		oNotebook = Notebook(name)
 		library.addToLibrary(oNotebook)
 		e.delete(0, 'end')
-		createlibraryframe.grid_forget()
 		id=library.getLibraryID()
 		value = oNotebook.notes
 		value =len(value)
@@ -79,6 +79,10 @@ def addnotes(notebook, entry, selection):
 		id = selection+'.'+subid
 		notebook.addNote(entry, id)
 		my_List.insert(parent=selection, index='end', iid=id, text=f"{entry[:10]}", values=(0))
+		changeHighlight(id)
+
+def changeHighlight(id):
+	my_List.selection_set(id)
 	
 	
 	
@@ -88,6 +92,7 @@ def getnotes(name):
 		print(i)
 		
 def getselection(entry):
+	'''gets the id of what is highlighted'''
 	selection = my_List.selection()[0]
 	parent_id = my_List.parent(selection)
 
@@ -102,6 +107,7 @@ def getselection(entry):
 		
 	
 def insertText():
+	'''makes highlighted note appear in text window'''
 	selecteditem = my_List.selection()[0]
 	parent_id = my_List.parent(selecteditem)
 	if parent_id == '':
@@ -113,25 +119,52 @@ def insertText():
 		text = notebook.notes[selecteditem]
 		notewindow.delete('1.0', 'end')
 		notewindow.insert('end', text)
+
+
+def save():
+	if not my_List.selection():
+		messagebox.showerror('Invalid operation', 'Please select a notebook')
+	else: 
+		getselection(notewindow.get('1.0', 'end'))
+
+
+
+		
+	
 	
 	
 
 
 
-	
-	
+def NoteFrame():
+	if noteFrame.grid_info():
+		print('yes')
+		noteFrame.grid_forget()
+		notewindow.delete('1.0', 'end')
+		noteFrame.grid(row=1, column=2)
+	else:
+		print('no')
+		noteFrame.grid(row=1, column=2)
 
 
 
-	
-	
-	
 
 
 
 	
 	
 root = Tk()
+
+
+my_menu = Menu(root)
+root.config(menu=my_menu)
+
+file_menu = Menu(my_menu)
+
+my_menu.add_cascade(label="File", menu=file_menu)
+
+file_menu.add_command(label="save", command=save)
+file_menu.add_command(label ="New note", command=NoteFrame)
 
 #add tree to sidebar.
 
@@ -146,48 +179,28 @@ my_List.column("entries" , anchor=W, width=150)
 my_List.heading("#0", text="Notebook", anchor=W)
 my_List.heading("entries", text="Number of entries", anchor=W)
 
-my_List.grid(row=1, column=0)
+my_List.grid(row=2, column=0)
 
-# add note window
-
-notewindow = Text(root)
-saveNotesButton = Button(text='save', command = lambda: getselection(notewindow.get('1.0', 'end')))
-saveNotesButton.grid(row=0, column=2) 
+noteFrame = Frame(root)
+	
+notewindow = Text(noteFrame)
 
 notewindow.grid(row=1, column = 2)
 my_List.bind('<<TreeviewSelect>>', lambda event: insertText())
 
+# add note window
 
 
 
 
-
-#add functions to sidebar
-
-
-sideframe = Frame(root)
-sideframe.grid(row=0, column=0)
-
-createNoteBookButton = Button(sideframe, text="click me to create a new notebook", command=lambda:  createlibraryframe.grid(row=0, column=1), anchor=E, height=2, width=4)
-
-createNoteBookButton.grid(row=2, column=0)
+e = Entry()
+instruction = Label(root, text="please enter a notebook name")
+addButton = Button(root, text="press to add", command=lambda: createNoteBook(e.get()))
 
 
-
-
-#  creates a new frame for entering notebook details and creating it.
-
-createlibraryframe = Frame(root)
-
-
-e = Entry(createlibraryframe)
-instruction = Label(createlibraryframe, text="please enter a notebook name")
-addButton = Button(createlibraryframe, text="press to add", command=lambda: createNoteBook(e.get()))
-
-
-e.grid(row=1, column=2)
-addButton.grid(row=2, column=2)
-instruction.grid(row=0, column=2)
+e.grid(row=0, column=1)
+addButton.grid(row=1, column=0)
+instruction.grid(row=0, column=0)
 
 
 
